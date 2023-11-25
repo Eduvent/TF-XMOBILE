@@ -1,0 +1,403 @@
+
+--------------------------------------------------------------------------
+--SI35
+--tabla de usuario
+create database TF_BaseDatos
+go
+use TF_BaseDatos
+go
+CREATE TABLE usuarios (
+    codigo int  NOT NULL,
+    nombre varchar(100)  NOT NULL,
+    clave varchar(20) NULL,
+    apellido_paterno varchar(100)  NOT NULL,
+    apellido_materno varchar(100)  NOT NULL,
+    telefono char(9)  NOT NULL,
+    correo_electronico varchar(100)  NOT NULL,
+	fecha_nacimiento date  NOT NULL,
+    CONSTRAINT usuarios_pk PRIMARY KEY  (codigo)
+);
+--tabla de dispositivos moviles
+CREATE TABLE dispositivos_moviles (
+    codigo int  NOT NULL,
+    modelo varchar(100)  NOT NULL,
+    precio money  NOT NULL,
+    fecha_lanzamiento date  NOT NULL,
+	codigo_categoria int  NOT NULL,
+    codigo_marca int  NOT NULL,
+	codigo_especificacion int NOT NULL,
+    CONSTRAINT dispositivo_movil_pk PRIMARY KEY  (codigo)
+);
+
+CREATE TABLE especificaciones (
+    codigo int  NOT NULL,
+    caracteristicas varchar(300)  NOT NULL,
+    CONSTRAINT especificaciones_pk PRIMARY KEY  (codigo)
+);
+
+CREATE TABLE categorias (
+    codigo int  NOT NULL,
+    nombre varchar(100)  NOT NULL,
+    CONSTRAINT categorias_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE comparativas (
+    codigo int  NOT NULL,
+    diferencias varchar(200)  NOT NULL,
+	similitudes varchar(200) NOT NULL,
+	codigo1_dispositivo_movil int  NOT NULL,
+	codigo2_dispositivo_movil int NOT NULL,
+    CONSTRAINT comparativas_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE recomendaciones (
+    codigo int  NOT NULL,
+    codigo_usuario int  NOT NULL,
+	codigo_dispositivo_movil int NOT NULL,
+    CONSTRAINT recomendaciones_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE resenas (
+    codigo int  NOT NULL,
+    calificacion varchar(10)  NOT NULL,
+	comentario text NOT NULL,
+	fecha date NOT NULL,
+	codigo_dispositivo_movil int NOT NULL,
+	codigo_usuario int NOT NULL,
+    CONSTRAINT resenas_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE favoritos (
+    codigo int  NOT NULL,
+    codigo_usuario int  NOT NULL,
+	codigo_dispositivo_movil int NOT NULL,
+    CONSTRAINT favoritos_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE historial_busquedas (
+    codigo int  NOT NULL,
+    fecha date  NOT NULL,
+	historial_comparativas text NOT NULL,
+	codigo_usuario int NOT NULL,
+    CONSTRAINT historial_busquedas_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE notificaciones (
+    codigo int  NOT NULL,
+    mensaje varchar(200)  NOT NULL,
+	fecha date NOT NULL,
+	codigo_usuario int NOT NULL,
+    CONSTRAINT notificaciones_pk PRIMARY KEY  (codigo)
+);
+CREATE TABLE marcas (
+    codigo int  NOT NULL,
+    nombre_marca varchar(200)  NOT NULL,	
+	CONSTRAINT marca_pk PRIMARY KEY  (codigo)
+);
+---------------
+ALTER TABLE favoritos ADD CONSTRAINT favoritos_por_dispositivos_moviles
+    FOREIGN KEY (codigo_dispositivo_movil)
+    REFERENCES dispositivos_moviles(codigo);
+--*
+ALTER TABLE favoritos ADD CONSTRAINT favoritos_por_usuarios
+    FOREIGN KEY (codigo_usuario)
+    REFERENCES usuarios(codigo);
+
+----
+ALTER TABLE recomendaciones ADD CONSTRAINT recomendaciones_por_dispositivos_moviles
+    FOREIGN KEY (codigo_dispositivo_movil)
+    REFERENCES dispositivos_moviles (codigo);
+--*
+ALTER TABLE recomendaciones ADD CONSTRAINT recomendaciones_por_usuarios
+    FOREIGN KEY (codigo_usuario)
+    REFERENCES usuarios (codigo);
+
+-----
+--*
+ALTER TABLE resenas ADD CONSTRAINT resenas_por_usuarios
+    FOREIGN KEY (codigo_usuario)
+    REFERENCES usuarios (codigo);
+
+ALTER TABLE resenas ADD CONSTRAINT resenas_por_dispositivos_moviles
+    FOREIGN KEY (codigo_dispositivo_movil)
+    REFERENCES dispositivos_moviles (codigo);
+
+----
+--*
+ALTER TABLE historial_busquedas ADD CONSTRAINT historial_busquedas_por_usuarios
+    FOREIGN KEY (codigo_usuario)
+    REFERENCES usuarios (codigo);
+
+----
+--*
+ALTER TABLE notificaciones ADD CONSTRAINT notificaciones_por_usuario
+
+    FOREIGN KEY (codigo_usuario)
+    REFERENCES usuarios (codigo);
+----
+
+ALTER TABLE comparativas ADD CONSTRAINT comparativas_por_dispositivo1_movil
+
+    FOREIGN KEY (codigo1_dispositivo_movil)
+    REFERENCES dispositivos_moviles (codigo);
+
+ALTER TABLE comparativas ADD CONSTRAINT comparativas_por_dispositivo2_movil
+    FOREIGN KEY (codigo2_dispositivo_movil)
+    REFERENCES dispositivos_moviles (codigo);
+-----
+ALTER TABLE dispositivos_moviles ADD CONSTRAINT especificacion_dispositivos_moviles
+    FOREIGN KEY (codigo_especificacion)
+    REFERENCES especificaciones (codigo);
+
+ALTER TABLE dispositivos_moviles ADD CONSTRAINT marcas_dispositivos_moviles
+
+    FOREIGN KEY (codigo_marca)
+    REFERENCES marcas (codigo);
+
+ALTER TABLE dispositivos_moviles ADD CONSTRAINT categorias_dispositivos_moviles
+    FOREIGN KEY (codigo_categoria)
+    REFERENCES categorias (codigo);
+go
+--Inserción de datos para el modelado relacional:
+INSERT INTO usuarios(codigo, nombre, apellido_paterno, apellido_materno, telefono, correo_electronico, fecha_nacimiento) VALUES
+(1, 'Sebastian', 'Alfaro', 'Cardenas', '982743124', 'sebalf09@gmail.com', '2004-07-09'),
+(2, 'Alvaro', 'Quispe', 'Contreras', '929042395', 'alvcontr23@gmail.com', '1998-12-23'),
+(3, 'Javier', 'Montes', 'Manayay', '994758916', 'javierm@gmail.com', '2000-03-05'),
+(4, 'Milagros', 'Flores', 'Navarro', '929496558', 'floresnavarrom@gmail.com', '2003-01-07'),
+(5, 'Jessica', 'Rojas', 'Burgos', '984554499', 'rojasjessica@gmail.com', '1999-11-01'),
+(6, 'Johan', 'Abreu', 'Sanchez', '919235547', 'abreu04@gmail.com', '1997-08-04'),
+(7, 'Javier', 'Sandoval', 'Vicente', '967634084', 'javiersand@gmail.com', '1996-04-12'),
+(8, 'David', 'Hervas', 'Pazos', '907215315', 'hervasdavid@gmail.com', '2001-09-03'),
+(9, 'Raul', 'Santana', 'Fernandez', '965011688', 'raulfernandez@gmail.com', '1998-07-12'),
+(10, 'Jorge', 'Zegarra', 'Lozano', '996609666', 'zegjorgeloz@gmail.com', '2005-04-02'),
+(11, 'Melchor', 'Pozo', 'Flores', '970841273', 'pozomel@gmail.com', '2002-01-25'),
+(12, 'Samir', 'Medrano', 'Torres', '918244022', 'medranotorresamir@gmail.com', '1998-06-13'),
+(13, 'Andrea', 'Chamorro', 'Diaz', '959822015', 'diazandrea@gmail.com', '1994-12-17'),
+(14, 'Juan', 'Prieto', 'Palmas', '911637308', 'palmasjuan@gmail.com', '2001-09-29'),
+(15, 'Antonio', 'Masias', 'Escobar', '955695647', 'escobarantonio@gmail.com', '2003-05-22'),
+(16, 'Byron David', 'Cevallos', 'Trujillo', '923124123', 'byron@gmail.com', '2002-08-27'),
+(17, 'Mercedes Maria', 'López', 'González', '934123456', 'merce10@gmail.com', '1997-03-06'),
+(18, 'Gonzalo Luis', 'Balcazar', 'Campoverde', '934578456', 'gonzabal@gmail.com', '1996-03-15'),
+(19, 'Fernanda Noemi', 'Campos', 'Mendieta', '978123456', 'fernanda@gmail.com', '2000-04-25'),
+(20, 'Jaime Eduardo', 'Cárdenas', 'Molina', '947246789', 'jaime@gmail.com', '1994-08-17'),
+(21, 'Carlos Daniel', 'Villavicencio', 'Pesantez', '998456789', 'carlos@gmail.com', '1989-06-16'),
+(22, 'Marlene Estefania', 'Novillo', 'Jara', '912356776', 'marlene@gmail.com', '1988-05-25'),
+(23, 'Johanna Sofia', 'Perez', 'Cabrera', '909812345', 'johann@gmail.com', '1990-07-16'),
+(24, 'Martha Patricia', 'Morales', 'Harris', '946128324', 'martmor@gmail.com', '1995-06-22'),
+(25, 'Diana Lucía', 'Iñiguez', 'Iñiguez', '983142678', 'dianalu@gmail.com', '1995-03-11'),
+(26, 'Jaime Vicente', 'Chuchuca', 'Serrano', '901234567', 'jaimevi@gmail.com', '1994-01-16'),
+(27, 'Sahira Maribel', 'Martinez', 'Cepeda', '901123456', 'sahira@gmail.com', '1994-10-25'),
+(28, 'Xavier Eduardo', 'Montalvo', 'Aponte', '934567890', 'xavi@gmail.com', '1993-02-07'),
+(29, 'Alex Ruben', 'Cobos', 'Veloz', '912890123', 'alexxxr@gmail.com', '1999-01-16'),
+(30, 'Mireya Katerine', 'Pazmiño', 'Arregui', '924456890', 'mireyakat@gmail.com', '1995-01-31');
+go
+--Insercion de datos para el modelado relacional:
+INSERT INTO especificaciones(codigo,caracteristicas)VALUES
+(1,'Peso:233.00 g - Pantalla: Dynamic AMOLED /16M colores/ 120 Hz / 1440 x 3088 px - Bateria:5000 mAh - RAM: 8gb - SO:Android 13 - Procesador:Qualcomm Snapdragon 8 Gen 2'),
+(2,'Peso:263.00 g - Pantalla: Dynamic AMOLED 2X/16M colores/ 120 Hz / 1812 x 2176 px - Bateria:4400 mAh - RAM: 12gb - SO:Android 12 - Procesador:Qualcomm Snapdragon 8+ Gen 1'),
+(3,'Peso:229.00 g - Pantalla: Dynamic AMOLED /16M colores/ 120 Hz / 1440 x 3088 px - Bateria:5000 mAh - RAM: 8gb - SO:Android 12 - Procesador:Samsung Exynos 2200'),
+(4,'Peso:200.00 g - Pantalla: OLED 1,07G colores / 120 Hz / 1220 x 2700 px - Bateria:4815 mAh - RAM: 8gb - SO:HarmonyOS 3.1 - Procesador:Qualcomm Snapdragon 8+ Gen 1'),
+(5,'Peso:229.00 g - Pantalla: OLED 1,07G colores / 120 Hz / 1440 x 3200 px - Bateria:4820 mAh - RAM: 8gb - SO:Android 13 - Procesador:Qualcomm Snapdragon 8 Gen 2'),
+(6,'Peso:191.00 g - Pantalla: AMOLED /16M colores/ 120 Hz / 1080 x 2520 px - Bateria:4300 mAh - RAM: 8gb - SO:Android 13 - Procesador:MediaTek Dimensity 9000+'),
+(7,'Peso:219.00 g - Pantalla: OLED 1,07G colores / 120 Hz / 1312 x 2848 px - Bateria:5100 mAh - RAM: 8gb - SO:Android 13 - Procesador:Qualcomm Snapdragon 8 Gen 2'),
+(8,'Peso:214.85 g - Pantalla: OLED 1,07G colores / 120 Hz / 1260 x 2800 px - Bateria:4870 mAh - RAM: 8gb - SO:Android 13 - Procesador:MediaTek Dimensity 9200' ),
+(9,'Peso:199.00 g - Pantalla: OLED 1,07G colores / 120 Hz / 1440 x 3216 px - Bateria:5000 mAh - RAM: 8gb - SO:Android 12 - Procesador:Qualcomm Snapdragon 8 Gen 1'),
+(10,'Peso:218.00 g - Pantalla: OLED 1,07G colores / 120 Hz / 1440 x 3216 px - Bateria:5000 mAh - RAM: 8gb - SO:Android 12 - Procesador:Qualcomm Snapdragon 8 Gen 1'),
+(11,'Peso:212.00 g - Pantalla: OLED /16M colores/ 120 Hz / 1440 x 3120 px - Bateria:5000 mAh - RAM: 8gb - SO:Android 13 -Procesador:Google Tensor G2 GS201'),
+(12,'Peso:221.00 g - Pantalla: OLED /16M colores/ 120 Hz / 1290 x 2796 px - Bateria:4422 mAh - RAM: 8gb - SO:iOS 17 - Procesador:Apple A17 Pro'),
+(13,'Peso:240.00 g - Pantalla: OLED /16M colores/ 120 Hz / 1290 x 2796 px - Bateria:4323 mAh - RAM: 8gb - SO:iOS 16 - Procesador:Apple A16 Bionic'),
+(14,'Peso:205.00 g - Pantalla: OLED /16M colores/ 120 Hz / 1440 x 3216 px - Bateria:5000 mAh - RAM: 12gb - SO:Android 13 - Procesador:Qualcomm Snapdragon 8 Gen 2'),
+(15,'Peso:227.00 g - Pantalla:  OLED /67,7G colores/ 120 Hz / 1440 x 3200 px - Bateria:5000 mAh - RAM: 12gb - SO:Android 13 - Procesador:Qualcomm Snapdragon 8 Gen 2' );
+go
+INSERT INTO marcas(codigo,nombre_marca) VALUES 
+(1,'Samsung'),
+(2,'Huawei'),
+(3,'Xiaomi'),
+(4,'OPPO'),
+(5,'Honor'),
+(6,'VIVO'),
+(7,'Realme'),
+(8,'OPPO'),
+(9,'Google'),
+(10,'Apple'),
+(11,'OnePlus');
+go
+--Insercion de datos para el modelado relacional:
+INSERT INTO dispositivos_moviles(codigo,modelo,precio,fecha_lanzamiento,codigo_marca,codigo_categoria,codigo_especificacion) VALUES 
+(1, 'SM-S918', 1199, '2023-02-01', 1, 1, 1),
+(2, 'SM-F936N', 1799, '2022-08-26', 1, 1, 2),
+(3, 'SM-9080', 899, '2022-03-07', 1, 1, 3),
+(4, 'MNA-AL00', 1099, '2023-05-09', 2, 1, 4),
+(5, '221032G', 789, '2023-02-26', 3, 1, 5),
+(6, 'CPH2437', 913, '2023-02-15', 4, 1, 6),
+(7, '5109ARFA', 988, '2023-03-02', 5, 1, 7),
+(8, 'V2242A', 1049, '2023-02-03', 6, 1, 8),
+(9, 'RMX3300', 619, '2022-03-08', 7, 1, 9),
+(10, 'CPH2305', 989, '2022-03-14', 8, 1, 10),
+(11, 'GE2AE', 525, '2022-10-13', 9, 1, 11),
+(12, 'A2849', 1199, '2023-09-22', 10, 1, 12),
+(13, 'A2651', 1099, '2022-09-16', 10, 1, 13),
+(14, 'CPH2449', 699, '2023-02-07', 11, 1, 14),
+(15, '2304FPN6DG', 970, '2023-06-14', 3, 1, 15);
+go
+--Insercion de datos para el modelado relacional:
+INSERT INTO notificaciones(codigo,mensaje,fecha,codigo_usuario) VALUES 
+(1, 'Un nuevo Iphone ha salido, mira las comparativas ', '2023-02-01', 1),
+(2, 'Un nuevo Iphone ha salido, mira las comparativas ',  '2022-08-26', 11),
+(3, 'Un nuevo Samsung ha salido, mira las comparativas ', '2022-03-07', 10),
+(4, 'Un nuevo Alcatel ha salido, mira las comparativas ', '2023-05-09', 2),
+(5, 'Un nuevo Redmi ha salido, mira las comparativas ', '2023-02-26', 3),
+(6, 'Un nuevo Honor ha salido, mira las comparativas ', '2023-02-15', 4),
+(7, 'Un nuevo Xiaomi ha salido, mira las comparativas ', '2023-03-02', 5),
+(8, 'Un nuevo Huawei ha salido, mira las comparativas ', '2023-02-03', 6),
+(9, 'Un nuevo Iphone ha salido, mira las comparativas ', '2022-03-08', 7),
+(10, 'Un nuevo OPPO ha salido, mira las comparativas ', '2022-03-14', 8),
+(11, 'Un nuevo OnePlus ha salido, mira las comparativas ', '2022-10-13', 9),
+(12, 'Un nuevo Vivo ha salido, mira las comparativas ', '2023-09-22', 12),
+(13, 'Un nuevo Pixel ha salido, mira las comparativas ', '2022-09-16', 14),
+(14, 'Un nuevo Redmi ha salido, mira las comparativas ', '2023-02-07', 15),
+(15, 'Un nuevo Iphone ha salido, mira las comparativas ', '2023-06-14', 13);
+go
+
+--tabla categoria insertada
+INSERT INTO categorias(codigo,nombre) VALUES 
+(1,'Celular'),
+(2,'Tablet'),
+(3,'Reloj');
+go
+---tabla favoritos insertadas
+INSERT INTO favoritos(codigo,codigo_usuario,codigo_dispositivo_movil) VALUES
+(1,1,14),
+(2,12,5),
+(3,15,12),
+(4,18,13),
+(5,11,15),
+(6,21,11),
+(7,30,7),
+(8,16,6),
+(9,19,2),
+(10,14,10),
+(11,9,9),
+(12,8,8),
+(13,7,4),
+(14,6,1),
+(15,4,3);
+go
+---tabla recomenadaciones insert into 
+INSERT INTO recomendaciones(codigo,codigo_usuario,codigo_dispositivo_movil) VALUES
+(1,14,1),
+(2,5,12),
+(3,12,15),
+(4,18,13),
+(5,15,11),
+(6,11,14),
+(7,30,7),
+(8,16,6),
+(9,2,10),
+(10,14,8),
+(11,3,9),
+(12,8,5),
+(13,7,4),
+(14,6,2),
+(15,4,3);
+go
+--INSER TO COMPARATIVAS
+INSERT INTO comparativas(codigo,diferencias,similitudes,codigo1_dispositivo_movil,codigo2_dispositivo_movil) VALUES 
+(1,'La diferencia entre estos 2 celulares se basan en la capacidad de 
+memoria RAM con las que vienen integradas','ADASDASDSA',1,2),
+(2,'Estos dos celulares son los ultimos lanzamientos de Apple se diferencia en que uno 
+tiene la ultima version de ios 17, al igual que su nuevo procesador A17 y mas 
+capacidad de mha en su bateria ','ADASDASDSAASDSA',12,13);
+go
+
+--INSERT INTO RESENAS
+INSERT INTO resenas(codigo,calificacion,comentario,fecha,codigo_dispositivo_movil,codigo_usuario)VALUES
+(1,9 ,'He pasado de tener un Galaxy A71 a este Galaxy S22 Ultra y la diferencia es palpable, la calidad de 
+la pantalla, las fotos que se pueden obtener y la velocidad con la que responde! 
+El S-pen me ayuda mucho con mis notas personales! 
+Me quedo muy contento con el equipo!', '2023-02-01', 1,2),
+(2, 10,'Sin el veto de EEUU serían el mejor fabricante Android sin duda.',  '2022-08-26', 2,5),
+(3, 7,' Buen hardware, pero alguien va a comprar este 
+Xiaomi por 800€ CON MIUI teniendo a un precio similar el iPhone 13 ?', '2022-03-07', 3,4),
+(4, 9,'Lo probé la semana pasada en el MWC Barcelona. Espectacular.
+Soy usuario de Apple y tengo mucho interes en los moviles de pantalla flexible y plegable como este.
+Probé varios modelos y este es desde luego el que más fluido iba, y en todos los 
+aspectos el que mejor se adaptaba a mi mano.', '2023-05-09', 4,10),
+(5,5,' Muy caro como todos los equipos de gama alta de este año, la 
+cámara puede mejorar con actualizaciones', '2023-02-26', 5,11),
+(6,5,'Nunca he sido cliente de gama alta, y en estos momentos la gama está altísima en precio.
+Si tuviese o pudiese comprar un móvil de más de 1.000€ iría a 
+por un iphone y un samsung.', '2023-02-15', 6,15),
+(7, 6,'Equipazo, pero bateria puede traicionar facilmente cuando se calienta', '2023-03-02', 7,20),
+(8, 6,'Mi interés por el producto cayó estrepitosamente cuando leí que costaba 1300 euros,
+sinceramente, para gastarme ese dineral en un movil me compraría seguramente un iPhone, 1300 por un chino, 
+de los buenos chinos, pero chino al fin y al cabo, como que duele...', '2023-02-03', 8,8),
+(9, 9,'Hoy por hoy es el mejor móvil de largo teniendo en cuenta su precio.', '2022-03-08', 9,9),
+(10,4,'Lo de Apple es de traca... Y aunque reconozco 
+y agradezco el esfuerzo de análisis así, las conclusiones
+también son... Una evolución silenciosa. Puerto usb-C. Y 
+ahí se quedó. El procesador es una mala evolución del a16 
+bionic, el n3b con graves problemas de consumo a máximo 
+rendimiento. Y el problema de la disipación del calor ya 
+visto en otros sitios especializados es que no tiene, para
+ahorre de peso y costes. Así que para reducir el problema 
+del calor solo les queda una cosa, actualizar a costa de 
+reducir rendimiento. No les queda otra. En cuanto a sonido, 
+pantalla y carga... La misma del año pasado. En cuanto a
+cámaras ya que yo soy muy aficionado a la fotografía. Si 
+te gusta realizar videos y fotos modo retrato indudable
+que es el mejor móvil. Pero ay si tu quieres un móvil completo
+en este apartado olvídate, porque ni en gran angular, ni modo
+noche y a veces ni el zoom máximo destacan. Y todo a partir de 
+1500 pavazos. Un móvil con una carga pésima, que se calienta 
+de más si le exiges, y por cierto, que tras las pruebas de 
+`dureza realizadas por un conocido canal, parte el vidrio trasero
+casi con mirarlo... Una nueva vuelta de tuerca a la estafa de Apple
+de cada año. Hace muchos años HTC sacó su m9, y le atizaron por 
+todos lados pq era muy continuista con respecto al m8 y encima se
+calentaba en exceso y fue el principio del fin de esa marca. Pero
+Apple paga mucho en marketing. Eso sí, tiene mérito vender un móvil chino como americano, a 
+precio de oro, decir que es leche en 
+tecnología mintiendo de forma descarada
+y que encima sus acólitos traguen...', '2022-03-14', 10,7),
+(11,9,' Si puedes y quieres pagarlo, la verdad
+es que lo que te llevas es espectacular: 
+batería, actualizaciones, soporte, fotos, 
+video, potencia, calidad de la pantalla 
+(no solo en colorimetría, etc., sino en el 
+ProMotion desde 1 hz hasta 120, brillo, AOD...), 
+acabados y calidad de construcción, diseño y así una tras
+otra... Apple ha unido lo mejor que 
+puede tener un móvil para ofrecer
+un producto que es realmente alucinante', '2022-10-13',11,12),
+(12, 10,'Sin duda, es un gran móvil. Podría decir que es el mejor, pero este dato es 
+subjetivo dependiendo de cada persona. La potencia es increíblemente buena, con un 
+gran rendimiento en apps y juegos. La cámara para mí sigue siendo de las mejores que
+encuentras en el mercado. Quizá la batería no es lo mejor del mundo, pero atendiendo
+a las características que lleva este dispositivo,
+está suficientemente bien (por no decir que tiene más 
+autonomía que el Samsung S23 Ultra ) ', '2023-09-22', 12,16),
+(13,6,' Si puedes y quieres pagarlo, la verdad es que lo que te 
+llevas es espectacular: batería, actualizaciones, soporte, fotos, video, 
+potencia, calidad de la pantalla (no solo en colorimetría, etc., sino en el
+ProMotion desde 1 hz hasta 120, brillo, AOD...), acabados y calidad de construcción, 
+diseño y así una tras otra... Apple ha unido lo mejor
+que puede tener un 
+móvil para ofrecer un producto 
+que es realmente alucinante', '2022-09-16', 13,17),
+(14,10 ,'Y yo tan contento con mi OnePlus 6 y no tengo necesidad de cambiar todavía. El día que quiera cambiar posiblemente repita con OnePlus.', '2023-02-07', 14,22),
+(15, 9,'Mi próximo telefono cuando cueste 250€', '2023-06-14', 15,23);
+go
+
+--Insert into Historial_Busquedas
+INSERT INTO historial_busquedas(codigo,fecha,historial_comparativas,codigo_usuario) VALUES 
+(1,'2023-02-01','S23 Ultra VS Xiaomi 13 pro',1),
+(2,'2022-08-26','OPPO N2 Flip VS Google Pixel 7 pro',2),
+(3,'2022-03-07','VIVO x90 pro VS OnePlus11',3),
+(4,'2023-05-09','Iphone 15 pro max VS Iphone 14 pro max',4),
+(5,'2023-02-26','OPPO Find X5 Pro VS Realme GT 2 pro ',5),
+(6,'2023-02-15','HONOR Magic5 Pro VS Galaxy s22 Ultra',6),
+(7,'2023-03-02','Xiaomi 13 Ultra VS Galaxy Z Fold 4',7),
+(8,'2023-02-03','Oppo N2 Flip VS Huawei P60 Pro',8),
+(9,'2022-03-08','Galaxy S23 ultra VS Iphone 15 pro max',9),
+(10,'2022-03-14','Realme GT 2 pro VS Galaxy s22 Ultra',10),
+(11,'2022-10-13','Oppo N2 Flip VS Galaxy s22 Ultra',11),
+(12,'2023-09-22','Realme GT 2 pro VS Iphone 14 pro max',12),
+(13,'2022-09-16','VIVO x90 VS Iphone 14 pro max',13),
+(14,'2023-02-07','OPPO Find X5 Pro VS Galaxy Z Fold 4',14),
+(15,'2023-06-14','Xiaomi 13 pro VS Xiaomi 13 Ultra',15);
+go

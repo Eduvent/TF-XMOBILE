@@ -1,0 +1,199 @@
+-- Crear una función que retorne el nombre de la marca que haya lanzado la mayor cantidad de dispositivos móviles en un año específico, siendo dicho año un parámetro de entrada.
+CREATE FUNCTION MarcaMasLanzamientos(@ano int)
+RETURNS varchar(200)
+AS
+BEGIN
+    DECLARE @nombreMarca varchar(200);
+
+    SELECT TOP 1 @nombreMarca = m.nombre_marca
+    FROM dispositivos_moviles d
+    JOIN marcas m ON d.codigo_marca = m.codigo
+    WHERE YEAR(fecha_lanzamiento) = @ano
+    GROUP BY m.nombre_marca
+    ORDER BY COUNT(*) DESC;
+
+    RETURN @nombreMarca;
+END;
+go
+SELECT dbo.MarcaMasLanzamientos(2023);
+
+-- Desarrollar un procedimiento almacenado que retorne el nombre del usuario que haya realizado la mayor cantidad de reseñas en la base de datos.
+CREATE PROCEDURE UsuarioMasResenas
+AS
+BEGIN
+    SELECT TOP 1 u.nombre, COUNT(*) AS TotalResenas
+    FROM resenas r
+    JOIN usuarios u ON r.codigo_usuario = u.codigo
+    GROUP BY u.nombre
+    ORDER BY TotalResenas DESC;
+END;
+EXEC UsuarioMasResenas;
+
+-- Implementar una función que devuelva el modelo del dispositivo móvil que ha sido añadido a favoritos más veces por los usuarios.
+CREATE FUNCTION DispositivoMasFavorito()
+RETURNS varchar(100)
+AS
+BEGIN
+    DECLARE @modeloDispositivo varchar(100);
+
+    SELECT TOP 1 @modeloDispositivo = dm.modelo
+    FROM favoritos f
+    JOIN dispositivos_moviles dm ON f.codigo_dispositivo_movil = dm.codigo
+    GROUP BY dm.modelo
+    ORDER BY COUNT(*) DESC;
+
+    RETURN @modeloDispositivo;
+END;
+SELECT dbo.DispositivoMasFavorito();
+
+-- Crear un procedimiento almacenado que retorne el nombre de la categoría de dispositivos móviles que tenga el menor número de dispositivos asociados en la base de datos.
+CREATE PROCEDURE CategoriaMenosPopular
+AS
+BEGIN
+    SELECT TOP 1 c.nombre, COUNT(*) AS TotalDispositivos
+    FROM dispositivos_moviles dm
+    JOIN categorias c ON dm.codigo_categoria = c.codigo
+    GROUP BY c.nombre
+    ORDER BY TotalDispositivos ASC;
+END;
+EXEC CategoriaMenosPopular;
+
+-- Desarrollar un procedimiento almacenado que retorne todos los dispositivos móviles cuyo precio se encuentre dentro de un rango especificado por dos parámetros: precio mínimo y precio máximo.
+CREATE PROCEDURE DispositivosEnRangoPrecio
+    @precioMin money,
+    @precioMax money
+AS
+BEGIN
+    SELECT modelo, precio
+    FROM dispositivos_moviles
+    WHERE precio BETWEEN @precioMin AND @precioMax;
+END;
+
+EXEC DispositivosEnRangoPrecio 500, 1000;
+
+-- Crear una función que reciba como parámetro el nombre de una marca y retorne todos los modelos de dispositivos móviles lanzados por esa marca.
+CREATE FUNCTION DispositivosPorMarca(@nombreMarca varchar(200))
+RETURNS TABLE
+AS
+RETURN
+    SELECT dm.modelo
+    FROM dispositivos_moviles dm
+    JOIN marcas m ON dm.codigo_marca = m.codigo
+    WHERE m.nombre_marca = @nombreMarca;
+
+SELECT * FROM dbo.DispositivosPorMarca('Samsung');
+-- Implementar un procedimiento almacenado que permita obtener los nombres de los usuarios nacidos en un mes y año específicos, los cuales son ingresados como parámetros.
+CREATE PROCEDURE UsuariosPorFechaNacimiento
+    @mes int,
+    @ano int
+AS
+BEGIN
+    SELECT nombre, apellido_paterno, apellido_materno, fecha_nacimiento
+    FROM usuarios
+    WHERE MONTH(fecha_nacimiento) = @mes AND YEAR(fecha_nacimiento) = @ano;
+END;
+EXEC UsuariosPorFechaNacimiento 12, 2010;
+
+-- Desarrollar una función que retorne el modelo del dispositivo móvil que tenga la calificación promedio más alta en las reseñas.
+CREATE FUNCTION DispositivoMejorCalificado()
+RETURNS varchar(100)
+AS
+BEGIN
+    DECLARE @modeloMejorCalificado varchar(100);
+
+    SELECT TOP 1 @modeloMejorCalificado = dm.modelo
+    FROM resenas r
+    JOIN dispositivos_moviles dm ON r.codigo_dispositivo_movil = dm.codigo
+    GROUP BY dm.modelo
+    ORDER BY AVG(CAST(calificacion AS float)) DESC;
+
+    RETURN @modeloMejorCalificado;
+END;
+SELECT dbo.DispositivoMejorCalificado();
+
+-- Crear un procedimiento almacenado que liste los usuarios que han añadido más dispositivos a sus favoritos.
+CREATE PROCEDURE UsuariosConMasFavoritos
+AS
+BEGIN
+    SELECT TOP 1 u.nombre, COUNT(*) AS TotalFavoritos
+    FROM favoritos f
+    JOIN usuarios u ON f.codigo_usuario = u.codigo
+    GROUP BY u.nombre
+    ORDER BY TotalFavoritos DESC;
+END;
+EXEC UsuariosConMasFavoritos;
+-- Desarrollar una función que devuelva las marcas que tienen dispositivos en una categoría específica, como 'Celular' o 'Tablet'.
+CREATE FUNCTION MarcasPorCategoria(@nombreCategoria varchar(200))
+RETURNS TABLE
+AS
+RETURN
+    SELECT m.nombre_marca
+    FROM dispositivos_moviles dm
+    JOIN marcas m ON dm.codigo_marca = m.codigo
+    JOIN categorias c ON dm.codigo_categoria = c.codigo
+    WHERE c.nombre = @nombreCategoria;
+-- Implementar un procedimiento almacenado que retorne los detalles de la comparativa más reciente entre dos dispositivos específicos.
+CREATE PROCEDURE ComparativaMasReciente
+    @modelo1 varchar(100),
+    @modelo2 varchar(100)
+AS
+BEGIN
+    SELECT TOP 1 c.diferencias, c.similitudes
+    FROM comparativas c
+    JOIN dispositivos_moviles dm1 ON c.codigo1_dispositivo_movil = dm1.codigo
+    JOIN dispositivos_moviles dm2 ON c.codigo2_dispositivo_movil = dm2.codigo
+    WHERE dm1.modelo = @modelo1 AND dm2.modelo = @modelo2
+    ORDER BY c.codigo DESC;
+END;
+EXEC ComparativaMasReciente 'SM-S918', 'SM-F936N';
+-- Crear una función que devuelva los modelos de dispositivos móviles lanzados en un mes y año específicos.
+CREATE FUNCTION DispositivosPorFechaLanzamiento(@mes int, @ano int)
+RETURNS TABLE
+AS
+RETURN
+    SELECT modelo
+    FROM dispositivos_moviles
+    WHERE MONTH(fecha_lanzamiento) = @mes AND YEAR(fecha_lanzamiento) = @ano;
+SELECT * FROM dbo.DispositivosPorFechaLanzamiento(2, 2023);
+-- Desarrollar un procedimiento almacenado que liste los usuarios que han realizado reseñas pero no han añadido ningún dispositivo a sus favoritos.
+CREATE PROCEDURE UsuariosSinFavoritos
+AS
+BEGIN
+    SELECT u.nombre, u.apellido_paterno, u.apellido_materno
+    FROM usuarios u
+    LEFT JOIN favoritos f ON u.codigo = f.codigo_usuario
+    WHERE f.codigo_usuario IS NULL;
+END;
+EXEC UsuariosSinFavoritos;
+-- Implementar una función que devuelva los modelos de dispositivos móviles que cumplen con ciertas especificaciones, como 'RAM' o 'Procesador'.
+CREATE FUNCTION DispositivosPorEspecificaciones(@nombreEspecificacion varchar(200))
+RETURNS TABLE
+AS
+RETURN
+    SELECT dm.modelo
+    FROM dispositivos_moviles dm
+    JOIN especificaciones e ON dm.codigo_especificacion = e.codigo
+    WHERE e.caracteristicas LIKE '%' + @nombreEspecificacion + '%';
+SELECT * FROM dbo.DispositivosPorEspecificaciones('RAM');
+-- Crear un procedimiento almacenado que liste todas las notificaciones recibidas por un usuario específico.
+create PROCEDURE NotificacionesPorUsuario
+    @nombreUsuario varchar(200)
+AS
+BEGIN
+    SELECT n.mensaje, n.fecha
+    FROM notificaciones n
+    JOIN usuarios u ON n.codigo_usuario = u.codigo
+    WHERE u.nombre = @nombreUsuario;
+END;
+EXEC NotificacionesPorUsuario 'Sebastian';
+
+-- Desarrollar una función que retorne el número total de dispositivos móviles disponibles en cada categoría.
+CREATE FUNCTION TotalDispositivosPorCategoria()
+RETURNS TABLE
+AS
+RETURN
+    SELECT c.nombre, COUNT(*) AS TotalDispositivos
+    FROM dispositivos_moviles dm
+    JOIN categorias c ON dm.codigo_categoria = c.codigo
+    GROUP BY c.nombre;
+SELECT * FROM dbo.TotalDispositivosPorCategoria();
